@@ -274,21 +274,7 @@ OnnxRuntimeTestSession::OnnxRuntimeTestSession(Ort::Env& env, std::random_device
         }
       } else if (key == "precision") {
         auto device_type = ov_options["device_type"];
-        if (device_type == "CPU") {
-          if (value == "" || value == "ACCURACY" || value == "FP32") {
-            ov_options[key] = "FP32";
-            continue;
-          } else {
-            ORT_THROW("[ERROR] [OpenVINO] Unsupported inference precision is selected. CPU only supports FP32 . \n");
-          }
-        } else if (device_type == "NPU") {
-          if (value == "" || value == "ACCURACY" || value == "FP16") {
-            ov_options[key] = "FP16";
-            continue;
-          } else {
-            ORT_THROW("[ERROR] [OpenVINO] Unsupported inference precision is selected. NPU only supported FP16. \n");
-          }
-        } else if (device_type == "GPU") {
+        if (device_type.find("GPU") != std::string::npos) {
           if (value == "") {
             ov_options[key] = "FP16";
             continue;
@@ -296,7 +282,23 @@ OnnxRuntimeTestSession::OnnxRuntimeTestSession(Ort::Env& env, std::random_device
             ov_options[key] = value;
             continue;
           } else {
-            ORT_THROW("[ERROR] [OpenVINO] Unsupported inference precision is selected. GPU only supported FP32 / FP16. \n");
+            ORT_THROW(
+                "[ERROR] [OpenVINO] Unsupported inference precision is selected. "
+                "GPU only supported FP32 / FP16. \n");
+          }
+        } else if (device_type.find("NPU") != std::string::npos) {
+          if (value == "" || value == "ACCURACY" || value == "FP16") {
+            ov_options[key] = "FP16";
+            continue;
+          } else {
+            ORT_THROW("[ERROR] [OpenVINO] Unsupported inference precision is selected. NPU only supported FP16. \n");
+          }
+        } else if (device_type.find("CPU") != std::string::npos) {
+          if (value == "" || value == "ACCURACY" || value == "FP32") {
+            ov_options[key] = "FP32";
+            continue;
+          } else {
+            ORT_THROW("[ERROR] [OpenVINO] Unsupported inference precision is selected. CPU only supports FP32 . \n");
           }
         }
       } else if (key == "enable_npu_fast_compile") {
@@ -312,6 +314,13 @@ OnnxRuntimeTestSession::OnnxRuntimeTestSession(Ort::Env& env, std::random_device
           ov_options[key] = value;
         } else {
           ORT_THROW("[ERROR] [OpenVINO] The value for the key 'enable_opencl_throttling' should be a boolean i.e. true or false. Default value is false.\n");
+        }
+      } else if (key == "enable_qdq_optimizer") {
+        if (value == "true" || value == "True" ||
+            value == "false" || value == "False") {
+          ov_options[key] = value;
+        } else {
+          ORT_THROW("[ERROR] [OpenVINO] The value for the key 'enable_qdq_optimizer' should be a boolean i.e. true or false. Default value is false.\n");
         }
       } else if (key == "disable_dynamic_shapes") {
         if (value == "true" || value == "True" ||
