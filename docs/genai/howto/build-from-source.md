@@ -183,6 +183,14 @@ python build.py --use_cuda
 ```bash
 python build.py
 ```
+
+### Build Java
+
+Building the Java bindings requires JDK 11. The resultng binaries will run with JDK 8 or later.
+
+```bash
+python build.py --build_java
+```
   
 ## Install the library into your application
 
